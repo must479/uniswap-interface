@@ -136,7 +136,7 @@
     "rollup-plugin-scss": "^3.0.0",
     "rollup-plugin-typescript2": "^0.31.1",
     "sass": "^1.45.1",
-    "serve": "^11.3.2",
+    "serve": "^14.1.0",
     "start-server-and-test": "^1.11.0",
     "typechain": "^5.0.0",
     "typescript": "^4.4.3",
