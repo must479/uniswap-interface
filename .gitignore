@@ -33,6 +33,14 @@
 .env.production.local
 .env
 
+# test
+.env
+artifacts
+cache
+node_modules
+.DS_Store
+build/
+
 /.netlify
 
 npm-debug.log*
