@@ -20,7 +20,7 @@ jobs:
       - name: Set up node
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 18
           registry-url: https://registry.npmjs.org
 
       - name: Get yarn cache directory path
@@ -44,9 +44,9 @@ jobs:
       - name: Synchronize
         uses: crowdin/github-action@1.1.0
         with:
-          upload_sources: false
+          upload_sources: true
           download_translations: true
-          project_id: 458284
+          project_id: 63acdab927684c0001501415
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN_SECRET }}
           source: 'src/locales/en-US.po'
           translation: 'src/locales/%locale%.po'
