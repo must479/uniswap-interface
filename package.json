@@ -127,7 +127,7 @@
     "react-use-gesture": "^6.0.14",
     "redux": "^4.1.2",
     "redux-localstorage-simple": "^2.3.1",
-    "rollup": "^2.63.0",
+    "rollup": "^3.29.5",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-delete": "^2.0.0",
     "rollup-plugin-dts": "^4.1.0",
