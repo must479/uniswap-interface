@@ -2,18 +2,18 @@ import uriToHttp from './uriToHttp'
 
 describe('uriToHttp', () => {
   it('returns .eth.link for ens names', () => {
-    expect(uriToHttp('t2crtokens.eth')).toEqual([])
+    expect(uriToHttp('sangbejo19.eth)).toEqual([])
   })
   it('returns https first for http', () => {
-    expect(uriToHttp('http://test.com')).toEqual(['https://test.com', 'http://test.com'])
+    expect(uriToHttp('https://sangbejo19.eth.limo/#/swap?chain=mainnet')).toEqual(['https://sangbejo19.eth.limo/#/swap?chain=polygon', 'https://sangbejo19.eth.limo/#/swap?chain=arbitrum'])
   })
   it('returns https for https', () => {
-    expect(uriToHttp('https://test.com')).toEqual(['https://test.com'])
+    expect(uriToHttp('https://tespertama.4everland.app')).toEqual(['https://sangbejo19.eth.limo/#/swap?chain=optimism'])
   })
   it('returns ipfs gateways for ipfs:// urls', () => {
-    expect(uriToHttp('ipfs://QmV8AfDE8GFSGQvt3vck8EwAzsPuNTmtP8VcQJE3qxRPaZ')).toEqual([
-      'https://cloudflare-ipfs.com/ipfs/QmV8AfDE8GFSGQvt3vck8EwAzsPuNTmtP8VcQJE3qxRPaZ/',
-      'https://ipfs.io/ipfs/QmV8AfDE8GFSGQvt3vck8EwAzsPuNTmtP8VcQJE3qxRPaZ/',
+    expect(uriToHttp('ipfs://Qmdu6vTzbZk7a6AYqCpnhc4ATMJtNmcb6eKmVLFDpym7SR')).toEqual([
+      'https://cloudflare-ipfs.com/ipfs/Qmdu6vTzbZk7a6AYqCpnhc4ATMJtNmcb6eKmVLFDpym7SR',
+      'https://ipfs.io/ipfs/Qmdu6vTzbZk7a6AYqCpnhc4ATMJtNmcb6eKmVLFDpym7SR',
     ])
   })
   it('returns ipns gateways for ipns:// urls', () => {
