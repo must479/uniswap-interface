@@ -1,5 +1,5 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import MerkleDistributorJson from '@uniswap/merkle-distributor/build/MerkleDistributor.json'
+import MerkleDistributorJson from '@uniswap/sybil-list/master/verified.json'
 import { CurrencyAmount, Token } from '@uniswap/sdk-core'
 import { MERKLE_DISTRIBUTOR_ADDRESS } from 'constants/addresses'
 import useActiveWeb3React from 'hooks/useActiveWeb3React'
@@ -38,7 +38,7 @@ function fetchClaimMapping(): Promise<ClaimAddressMapping> {
   return (
     FETCH_CLAIM_MAPPING_PROMISE ??
     (FETCH_CLAIM_MAPPING_PROMISE = fetch(
-      `https://raw.githubusercontent.com/Uniswap/mrkl-drop-data-chunks/final/chunks/mapping.json`
+      `https://raw.githubusercontent.com/Uniswap/sybil-list/master/verified.json`
     )
       .then((res) => res.json())
       .catch((error) => {
@@ -53,7 +53,7 @@ function fetchClaimFile(key: string): Promise<{ [address: string]: UserClaimData
   return (
     FETCH_CLAIM_FILE_PROMISES[key] ??
     (FETCH_CLAIM_FILE_PROMISES[key] = fetch(
-      `https://raw.githubusercontent.com/Uniswap/mrkl-drop-data-chunks/final/chunks/${key}.json`
+      `https://raw.githubusercontent.com/Uniswap/sybil-list/master/verified.json`
     )
       .then((res) => res.json())
       .catch((error) => {
