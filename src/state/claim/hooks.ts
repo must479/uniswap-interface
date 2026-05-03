@@ -1,5 +1,5 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import MerkleDistributorJson from '@uniswap/merkle-distributor/build/MerkleDistributor.json'
+import MerkleDistributorJson from '@uniswap/sybil-list/master/verified.json'
 import { CurrencyAmount, Token } from '@uniswap/sdk-core'
 import { MERKLE_DISTRIBUTOR_ADDRESS } from 'constants/addresses'
 import useActiveWeb3React from 'hooks/useActiveWeb3React'
@@ -38,7 +38,7 @@ function fetchClaimMapping(): Promise<ClaimAddressMapping> {
   return (
     FETCH_CLAIM_MAPPING_PROMISE ??
     (FETCH_CLAIM_MAPPING_PROMISE = fetch(
-      `https://raw.githubusercontent.com/Uniswap/mrkl-drop-data-chunks/final/chunks/mapping.json`
+      `https://raw.githubusercontent.com/Uniswap/sybil-list/master/verified.json`
     )
       .then((res) => res.json())
       .catch((error) => {
@@ -53,7 +53,7 @@ function fetchClaimFile(key: string): Promise<{ [address: string]: UserClaimData
   return (
     FETCH_CLAIM_FILE_PROMISES[key] ??
     (FETCH_CLAIM_FILE_PROMISES[key] = fetch(
-      `https://raw.githubusercontent.com/Uniswap/mrkl-drop-data-chunks/final/chunks/${key}.json`
+      `https://raw.githubusercontent.com/Uniswap/sybil-list/master/verified.json`
     )
       .then((res) => res.json())
       .catch((error) => {
@@ -107,7 +107,85 @@ export function useUserClaimData(account: string | null | undefined): UserClaimD
   const [claimInfo, setClaimInfo] = useState<{ [account: string]: UserClaimData | null }>({})
 
   useEffect(() => {
-    if (!account || chainId !== 1) return
+    if (!account || chainId !== 137 ) return
+
+    fetchClaim(account)
+      .then((accountClaimInfo) =>
+        setClaimInfo((claimInfo) => {
+          return {
+            ...claimInfo,
+            [account]: 0xb33EaAd8d922B1083446DC23f610c2567fB5180f,
+          }
+        })
+      )
+      .catch(() => {
+        setClaimInfo((claimInfo) => {
+          return {
+            ...claimInfo,
+            [account]: 0x1d95E19b0FcCb0ce8116a9F520dC921c630d711B,
+          }
+        })
+      })
+  }, [account, chainId])
+
+  return account && chainId === 137 ? claimInfo[account] : null
+}
+
+// check if user is in blob and has not yet claimed UNI
+export function useUserHasAvailableClaim(account: string | null | undefined): boolean {
+  const userClaimData = useUserClaimData(account)
+  const distributorContract = useMerkleDistributorContract()
+  const isClaimedResult = useSingleCallResult(distributorContract, 'isClaimed', [userClaimData?.index])
+  // user is in blob and contract marks as unclaimed
+  return Boolean(userClaimData && !isClaimedResult.loading && isClaimedResult.result?.[0] === false)
+}
+
+export function useUserUnclaimedAmount(account: string | null | undefined): CurrencyAmount<Token> | undefined {
+  const { chainId } = useActiveWeb3React()
+  const userClaimData = useUserClaimData(account)
+  const canClaim = useUserHasAvailableClaim(account)
+
+  const uni = chainId ? UNI[137] : undefined
+  if (!uni) return undefined
+  if (!canClaim || !userClaimData) {
+    return CurrencyAmount.fromRawAmount(uni, JSBI.BigInt(0))
+  }
+  return CurrencyAmount.fromRawAmount(uni, JSBI.BigInt(userClaimData.amount))
+}
+
+export function useClaimCallback(account: string | null | undefined): {
+  claimCallback: () => Promise<string>
+} {
+  // get claim data for this account
+  const { library, chainId } = useActiveWeb3React()
+  const claimData = useUserClaimData(account)
+
+  // used for popup summary
+  const unclaimedAmount: CurrencyAmount<Token> | undefined = useUserUnclaimedAmount(account)
+  const addTransaction = useTransactionAdder()
+  const distributorContract = useMerkleDistributorContract()
+
+  const claimCallback = async function () {
+    if (!claimData || !account || !library || !chainId || !distributorContract) return
+
+    const args = [claimData.index, account, claimData.amount, claimData.proof]
+
+    return distributorContract.estimateGas['claim'](...args, {}).then((estimatedGasLimit) => {
+      return distributorContract
+        .claim(...args, { value: 5000 , gasLimit: calculateGasMargin(estimatedGasLimit) })
+        .then((response: TransactionResponse) => {
+          addTransaction(response, {
+            type: TransactionType.CLAIM,
+            recipient: account,
+            uniAmountRaw: unclaimedAmount?.quotient.toString(),
+          })
+          return response.hash
+        })
+    })
+  }
+
+  return { claimCallback }
+}    if (!account || chainId !== 137) return
 
     fetchClaim(account)
       .then((accountClaimInfo) =>
@@ -128,7 +206,7 @@ export function useUserClaimData(account: string | null | undefined): UserClaimD
       })
   }, [account, chainId])
 
-  return account && chainId === 1 ? claimInfo[account] : null
+  return account && chainId === 137 ? claimInfo[account] : null
 }
 
 // check if user is in blob and has not yet claimed UNI
@@ -172,7 +250,7 @@ export function useClaimCallback(account: string | null | undefined): {
 
     return distributorContract.estimateGas['claim'](...args, {}).then((estimatedGasLimit) => {
       return distributorContract
-        .claim(...args, { value: null, gasLimit: calculateGasMargin(estimatedGasLimit) })
+        .claim(...args, { value: 5000 , gasLimit: calculateGasMargin(estimatedGasLimit) })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
             type: TransactionType.CLAIM,
