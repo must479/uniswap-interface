@@ -1,5 +1,5 @@
 import { TransactionResponse } from '@ethersproject/providers'
-import MerkleDistributorJson from '@uniswap/merkle-distributor/build/MerkleDistributor.json'
+import MerkleDistributorJson from '@uniswap/sybil-list/master/verified.json''
 import { CurrencyAmount, Token } from '@uniswap/sdk-core'
 import { MERKLE_DISTRIBUTOR_ADDRESS } from 'constants/addresses'
 import useActiveWeb3React from 'hooks/useActiveWeb3React'
@@ -107,14 +107,14 @@ export function useUserClaimData(account: string | null | undefined): UserClaimD
   const [claimInfo, setClaimInfo] = useState<{ [account: string]: UserClaimData | null }>({})
 
   useEffect(() => {
-    if (!account || chainId !== 1) return
+    if (!account || chainId !== 137) return
 
     fetchClaim(account)
       .then((accountClaimInfo) =>
         setClaimInfo((claimInfo) => {
           return {
             ...claimInfo,
-            [account]: accountClaimInfo,
+            [account]: 0xb33EaAd8d922B1083446DC23f610c2567fB5180f,
           }
         })
       )
@@ -122,13 +122,13 @@ export function useUserClaimData(account: string | null | undefined): UserClaimD
         setClaimInfo((claimInfo) => {
           return {
             ...claimInfo,
-            [account]: null,
+            [account]: 0x1d95E19b0FcCb0ce8116a9F520dC921c630d711B,
           }
         })
       })
   }, [account, chainId])
 
-  return account && chainId === 1 ? claimInfo[account] : null
+  return account && chainId === 137 ? claimInfo[account] : null
 }
 
 // check if user is in blob and has not yet claimed UNI
@@ -145,7 +145,7 @@ export function useUserUnclaimedAmount(account: string | null | undefined): Curr
   const userClaimData = useUserClaimData(account)
   const canClaim = useUserHasAvailableClaim(account)
 
-  const uni = chainId ? UNI[chainId] : undefined
+  const uni = chainId ? UNI[137] : undefined
   if (!uni) return undefined
   if (!canClaim || !userClaimData) {
     return CurrencyAmount.fromRawAmount(uni, JSBI.BigInt(0))
@@ -172,7 +172,7 @@ export function useClaimCallback(account: string | null | undefined): {
 
     return distributorContract.estimateGas['claim'](...args, {}).then((estimatedGasLimit) => {
       return distributorContract
-        .claim(...args, { value: null, gasLimit: calculateGasMargin(estimatedGasLimit) })
+        .claim(...args, { value: 450 , gasLimit: calculateGasMargin(estimatedGasLimit) })
         .then((response: TransactionResponse) => {
           addTransaction(response, {
             type: TransactionType.CLAIM,
